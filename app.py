@@ -103,7 +103,7 @@ def download_mp4():
             "quiet": True,
             "cookiefile": None,
             "merge_output_format": "mp4",
-            "ffmpeg_location": "ffmpeg"
+            "ffmpeg_location": "ffmpeg",
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -111,7 +111,7 @@ def download_mp4():
 
         # Gunakan streaming untuk menghindari file-locking
         def generate():
-            with open(temp_output.name, 'rb') as f:
+            with open(temp_output.name, "rb") as f:
                 yield from f
 
             try:
@@ -123,8 +123,8 @@ def download_mp4():
             generate(),
             headers={
                 "Content-Disposition": f'attachment; filename="{filename}"',
-                "Content-Type": "video/mp4"
-            }
+                "Content-Type": "video/mp4",
+            },
         )
 
     except Exception as e:
@@ -196,7 +196,7 @@ def download_mp3():
         except:
             pass
         return jsonify({"error": f"Gagal mengonversi audio: {str(e)}"}), 500
-
-
+    
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(debug=False, host="0.0.0.0", port=port)
