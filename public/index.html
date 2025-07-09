@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .loader {
+            border-top-color: #3b82f6;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal-enter,
+        .content-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .modal-enter-active,
+        .content-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-leave,
+        .content-leave {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .modal-leave-active,
+        .content-leave-active {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ad-placeholder {
+            background-color: #334155;
+            border: 2px dashed #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-white bg-gradient-to-br from-gray-900 to-slate-900">
+
+    <div class="flex flex-col min-h-screen">
+
+        <!-- Header / Navbar -->
+        <header class="bg-slate-800/50 backdrop-blur-sm shadow-md sticky top-0 z-40 border-b border-slate-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <a href="/" class="flex-shrink-0 flex items-center gap-2">
+                            <svg class="h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            <span class="text-white font-bold text-xl">YT Downloader</span>
+                        </a>
+                    </div>
+                    <!-- Menu Desktop -->
+                    <div class="hidden md:block">
+                        <div class="ml-4 flex items-center md:ml-6 space-x-2">
+                            <button id="help-btn"
+                                class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Bantuan</button>
+                            <button id="contact-btn"
+                                class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Kontak</button>
+                        </div>
+                    </div>
+                    <!-- Tombol Hamburger Menu Mobile -->
+                    <div class="md:hidden">
+                        <button id="hamburger-btn"
+                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                            <span class="sr-only">Buka menu utama</span>
+                            <svg id="hamburger-open-icon" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <svg id="hamburger-close-icon" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Menu Mobile -->
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <button id="mobile-help-btn"
+                        class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors">Bantuan</button>
+                    <button id="mobile-contact-btn"
+                        class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors">Kontak</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ▼▼▼ [IKLAN ADSTERRA #1] TEMPAT BANNER 728x90 (Desktop) ▼▼▼ -->
+        <div class="hidden md:flex justify-center my-4">
+            <div class="ad-placeholder" style="width: 728px; height: 90px;">
+                <!-- Kode Iklan Adsterra 728x90 Anda Ditaruh Di Sini -->
+                Slot Iklan 728x90
+            </div>
+        </div>
+        <!-- ▲▲▲ [IKLAN ADSTERRA #1] AKHIR DARI TEMPAT BANNER ▲▲▲ -->
+
+        <!-- Main Content -->
+        <main class="flex-grow flex items-center justify-center p-4">
+            <div
+                class="w-full max-w-2xl bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-2xl p-6 md:p-8">
+
+                <!-- Input Section -->
+                <div id="input-section">
+                    <div class="text-center mb-8">
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white">YT Downloader</h1>
+                        <p class="text-gray-400 mt-2 text-base sm:text-lg">Tempelkan tautan video untuk memulai.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                        <input type="text" id="youtube-url" placeholder="Masukkan URL disini...."
+                            class="flex-grow bg-gray-700 text-white border-2 border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
+                        <button id="download-btn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 flex items-center justify-center transform hover:scale-105 active:scale-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Dapatkan Video
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Download Options Section (Initially Hidden) -->
+                <div id="download-options-section" class="hidden">
+                    <div class="relative">
+                        <button id="close-download-options-btn"
+                            class="absolute -top-2 -right-2 text-gray-500 hover:text-white transition-colors z-10">
+                            <span class="sr-only">Tutup</span>
+                            <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+
+                        <div class="text-center">
+                            <img id="video-thumbnail" src="" alt="Video thumbnail"
+                                class="w-full max-w-sm mx-auto rounded-lg shadow-lg mb-4">
+                            <h2 id="video-title" class="text-xl font-bold text-white mb-6"></h2>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Video Options -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-blue-400 mb-3">Video (MP4) -- Maintenance</h3>
+                                <div id="video-download-list" class="space-y-3"></div>
+                            </div>
+                            <!-- ▼▼▼ [IKLAN ADSTERRA #2] TEMPAT NATIVE BANNER ▼▼▼ -->
+                            <div class="my-4">
+                                <div class="ad-placeholder w-full h-24">
+                                    Slot Iklan Native Banner
+                                </div>
+                            </div>
+                            <!-- ▲▲▲ [IKLAN ADSTERRA #2] AKHIR DARI TEMPAT NATIVE BANNER ▲▲▲ -->
+                            <!-- Audio Options -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-pink-400 mb-3">Audio (MP3)</h3>
+                                <div id="audio-download-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-8">
+                            <button id="back-btn"
+                                class="text-blue-400 hover:text-blue-300 font-medium transition-colors">Cari video
+                                lain</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Message Section -->
+                <div id="result-section" class="mt-6 text-center">
+                    <div id="loader"
+                        class="hidden mx-auto loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4">
+                    </div>
+                    <div id="message-box" class="bg-slate-700 p-4 rounded-lg text-gray-300 hidden">
+                        <h3 id="message-title" class="font-semibold text-lg mb-2 text-white"></h3>
+                        <p id="message-text"></p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8 text-xs text-gray-500">
+                    <p>Harap pastikan Anda memiliki izin dari pemilik konten sebelum mengunduh video apa pun.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- ▼▼▼ [IKLAN ADSTERRA #3] TEMPAT BANNER 300x250 (Mobile & Desktop) ▼▼▼ -->
+        <div class="flex justify-center my-4 px-4">
+            <div class="ad-placeholder" style="width: 300px; height: 250px;">
+                Slot Iklan 300x250
+            </div>
+        </div>
+        <!-- ▲▲▲ [IKLAN ADSTERRA #3] AKHIR DARI TEMPAT BANNER ▲▲▲ -->
+
+        <!-- Footer -->
+        <footer class="bg-slate-800/50 border-t border-slate-700">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                <p class="text-center text-sm text-gray-400">&copy; 2025 YouTube Downloader</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals (Help & Contact) -->
+    <div id="help-modal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden modal-enter">
+        <div
+            class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg p-6 md:p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 sticky top-0 bg-slate-800 py-2 -mt-2">
+                <h2 class="text-2xl font-bold text-white">Pusat Bantuan</h2>
+                <button id="close-help-modal-btn" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-6 text-gray-300">
+                <div>
+                    <h3 class="font-bold text-lg text-white mb-2">Cara Penggunaan</h3>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li><span class="font-semibold text-blue-400">Cari & Salin Tautan:</span> Buka YouTube dan salin
+                            URL video.</li>
+                        <li><span class="font-semibold text-blue-400">Tempel Tautan:</span> Kembali ke aplikasi ini dan
+                            tempelkan tautan.</li>
+                        <li><span class="font-semibold text-blue-400">Pilih Format:</span> Klik "Dapatkan Video", lalu
+                            pilih format yang Anda inginkan.</li>
+                        <li><span class="font-semibold text-blue-400">Unduh:</span> Klik tombol "Unduh" pada format yang
+                            dipilih.</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-white mb-2">FAQ</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="font-semibold">Apakah layanan ini gratis?</p>
+                            <p>Ya, situs ini gratis digunakan.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Mengapa saya tidak bisa mengunduh langsung?</p>
+                            <p>Aplikasi ini bertindak sebagai perantara. Klik tombol "Unduh" akan membuka link unduhan
+                                asli di tab baru agar Anda bisa menyimpannya.</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-white mb-2">Peringatan Hak Cipta</h3>
+                    <p>Mengunduh konten berhak cipta tanpa izin adalah ilegal. Gunakan alat ini secara bertanggung
+                        jawab.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="contact-modal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden modal-enter">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Send me a message</h2>
+                <button id="close-contact-modal-btn" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="contact-form">
+                <div class="mb-4"><label for="name"
+                        class="block text-gray-300 text-sm font-bold mb-2">Nama</label><input type="text" id="name"
+                        name="name"
+                        class="w-full bg-gray-700 text-white border-2 border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required></div>
+                <div class="mb-4"><label for="email"
+                        class="block text-gray-300 text-sm font-bold mb-2">Email</label><input type="email" id="email"
+                        name="email"
+                        class="w-full bg-gray-700 text-white border-2 border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required></div>
+                <div class="mb-6"><label for="message"
+                        class="block text-gray-300 text-sm font-bold mb-2">Message</label><textarea id="message"
+                        name="message" rows="4"
+                        class="w-full bg-gray-700 text-white border-2 border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required></textarea></div>
+                <div class="flex justify-end"><button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">Kirim
+                        Pesan</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ▼▼▼ [IKLAN ADSTERRA #4] TEMPAT SCRIPT POPUNDER / SOCIAL BAR ▼▼▼
+        // ▲▲▲ [IKLAN ADSTERRA #4] AKHIR DARI TEMPAT SCRIPT ▲▲▲
+
+        // --- DOM Elements ---
+        const inputSection = document.getElementById('input-section');
+        const downloadOptionsSection = document.getElementById('download-options-section');
+        const urlInput = document.getElementById('youtube-url');
+        const downloadBtn = document.getElementById('download-btn');
+        const backBtn = document.getElementById('back-btn');
+        const closeDownloadOptionsBtn = document.getElementById('close-download-options-btn');
+        const messageBox = document.getElementById('message-box');
+        const messageTitle = document.getElementById('message-title');
+        const messageText = document.getElementById('message-text');
+        const loader = document.getElementById('loader');
+        const videoThumbnail = document.getElementById('video-thumbnail');
+        const videoTitle = document.getElementById('video-title');
+        const videoList = document.getElementById('video-download-list');
+        const audioList = document.getElementById('audio-download-list');
+
+        // --- Event Listeners ---
+        downloadBtn.addEventListener('click', handleDownloadRequest);
+        backBtn.addEventListener('click', showInputSection);
+        closeDownloadOptionsBtn.addEventListener('click', showInputSection);
+
+        // --- Functions ---
+        async function handleDownloadRequest() {
+            hideMessage();
+            if (!urlInput.value.trim()) {
+                showMessage('Tautan Kosong', 'Harap masukkan tautan video YouTube.', 'error');
+                return;
+            }
+
+            loader.classList.remove('hidden');
+            inputSection.classList.add('hidden');
+            downloadOptionsSection.classList.add('hidden');
+
+            try {
+                // URL fetch sekarang relatif, karena disajikan dari server yang sama
+                const response = await fetch('/api/fetch-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput.value.trim() })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Gagal mengambil informasi video.');
+                }
+
+                videoThumbnail.src = data.thumbnail;
+                videoTitle.textContent = data.title;
+                videoList.innerHTML = '';
+                audioList.innerHTML = '';
+
+                if (!data.formats || data.formats.length === 0) {
+                    showMessage('Tidak Ditemukan', 'Tidak ada format unduhan yang valid untuk video ini.', 'error');
+                    showInputSection(); // Kembali ke input jika tidak ada format
+                    return;
+                }
+
+                data.formats.forEach(format => {
+                    const fileSize = format.filesize_approx ? `(~${(format.filesize_approx / 1024 / 1024).toFixed(2)} MB)` : '';
+                    const isAudio = format.ext === 'mp3';
+                    const buttonColor = isAudio ? 'bg-pink-600 hover:bg-pink-700' : 'bg-emerald-600 hover:bg-emerald-700';
+
+                    const listItem = `
+                    <div class="flex items-center justify-between bg-slate-700/50 p-3 rounded-lg">
+                        <div class="font-medium">${format.resolution} <span class="text-xs text-gray-400 ml-2">${fileSize}</span></div>
+                        <a href="${format.download_url}" class="${buttonColor} text-white font-bold py-2 px-4 rounded-md text-sm">Unduh</a>
+                    </div>`;
+
+                    if (isAudio) {
+                        audioList.innerHTML += listItem;
+                    } else {
+                        videoList.innerHTML += listItem;
+                    }
+                });
+
+                showDownloadOptions();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Terjadi Kesalahan', error.message, 'error');
+                showInputSection();
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function showInputSection() {
+            downloadOptionsSection.classList.add('hidden');
+            inputSection.classList.remove('hidden');
+            hideMessage();
+            urlInput.value = '';
+        }
+
+        function showDownloadOptions() {
+            downloadOptionsSection.classList.remove('hidden');
+        }
+
+        function showMessage(title, text, type = 'info') {
+            messageTitle.textContent = title;
+            messageText.innerHTML = text;
+            messageBox.className = 'p-4 rounded-lg text-gray-300';
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-500/20', 'border', 'border-red-500/30');
+                messageTitle.classList.add('text-red-300');
+            } else {
+                messageBox.classList.add('bg-slate-700');
+                messageTitle.classList.add('text-white');
+            }
+            messageBox.classList.remove('hidden');
+        }
+
+        function hideMessage() {
+            messageBox.classList.add('hidden');
+        }
+
+        // --- Hamburger Menu Logic ---
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const openIcon = document.getElementById('hamburger-open-icon');
+        const closeIcon = document.getElementById('hamburger-close-icon');
+
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            openIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
+
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+            openIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+
+        // --- Generic Modal Logic ---
+        function setupModal(triggerBtnIds, modalId, closeBtnId) {
+            const modal = document.getElementById(modalId);
+            const closeBtn = document.getElementById(closeBtnId);
+            function open() {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('modal-enter-active'), 10);
+                closeMobileMenu();
+            }
+            function close() {
+                modal.classList.remove('modal-enter-active');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+            triggerBtnIds.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.addEventListener('click', open);
+            });
+            if (closeBtn) closeBtn.addEventListener('click', close);
+            if (modal) modal.addEventListener('click', (event) => { if (event.target === modal) close(); });
+            return { open, close };
+        }
+
+        // --- Initialize Modals ---
+        const contactModal = setupModal(['contact-btn', 'mobile-contact-btn'], 'contact-modal', 'close-contact-modal-btn');
+        const helpModal = setupModal(['help-btn', 'mobile-help-btn'], 'help-modal', 'close-help-modal-btn');
+
+        // --- Contact Form Logic ---
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                alert('Terima kasih! Pesan Anda telah terkirim.');
+                contactForm.reset();
+                contactModal.close();
+            });
+        }
+    </script>
+</body>
+
+</html>
