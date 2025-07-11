@@ -18,7 +18,7 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/api/fetch-info", methods=["POST"])
+@app.route("https://iky.pythonanywhere.com/api/fetch-info", methods=["POST"])
 def fetch_info():
     url = request.json.get("url")
     if not url:
@@ -81,13 +81,13 @@ def fetch_info():
                 "title": info.get("title", "Tanpa Judul"),
                 "thumbnail": info.get("thumbnail"),
                 "formats": formats_to_send,
+                "original_url": url,
             }
             return jsonify(video_data)
 
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": f"Terjadi kesalahan pada server: {str(e)}"}), 500
-
 
 @app.route("/download-mp4")
 def download_mp4():
@@ -96,41 +96,33 @@ def download_mp4():
 
     try:
         temp_output = NamedTemporaryFile(delete=False, suffix=".mp4")
+        output_path = temp_output.name
+        temp_output.close()  # Hindari file locking
 
         ydl_opts = {
             "format": "bestvideo+bestaudio/best",
-            "outtmpl": temp_output.name,
+            "outtmpl": output_path,
             "quiet": True,
-            "cookiefile": None,
             "merge_output_format": "mp4",
-            "ffmpeg_location": "ffmpeg",
+            "ffmpeg_location": "D:/ffmpeg/bin/ffmpeg.exe"
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-        # Gunakan streaming untuk menghindari file-locking
-        def generate():
-            with open(temp_output.name, "rb") as f:
-                yield from f
-
+        @after_this_request
+        def cleanup(response):
             try:
-                os.remove(temp_output.name)
+                os.remove(output_path)
             except Exception as e:
                 print(f"Gagal menghapus file: {e}")
+            return response
 
-        return Response(
-            generate(),
-            headers={
-                "Content-Disposition": f'attachment; filename="{filename}"',
-                "Content-Type": "video/mp4",
-            },
-        )
+        return send_file(output_path, as_attachment=True, download_name=filename, mimetype="video/mp4")
 
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": f"Gagal mengunduh file: {str(e)}"}), 500
-
 
 @app.route("/download-mp3")
 def download_mp3():
