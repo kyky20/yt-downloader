@@ -18,7 +18,7 @@ def home():
     return render_template("index.html")
 
 
-@app.route("https://iky.pythonanywhere.com/api/fetch-info", methods=["POST"])
+@app.route("/api/fetch-info", methods=["POST"])
 def fetch_info():
     url = request.json.get("url")
     if not url:
