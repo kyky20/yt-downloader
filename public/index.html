@@ -375,7 +375,7 @@
 
             try {
                 // URL fetch sekarang relatif, karena disajikan dari server yang sama
-                const response = await fetch('/api/fetch-info', {
+                const response = await fetch('https://iky.pythonanywhere.com/api/fetch-info', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: urlInput.value.trim() })
